@@ -18,8 +18,11 @@
  * Mux<DigitalIn> input(D3, 4, <select lines>)	// 16-channel input mux on D3
  * int reading = input[12].read()				// Read channel 12
  * 
- * Channels are indexed from 0 to 2^N-1. An example target device for this class
- * is the Sparkfun CD74HC4067 16-channel mux breakout (see references).
+ * Channels are indexed from 0 to 2^N-1. Note that device-specific hardware
+ * latency may result in a pin operation proceeding before the select lines
+ * have settled. To compensate for this, instances of the Mux class take a
+ * microsecond delay at construction which automatically occurs after each
+ * select line change before allowing for a pin operation.
  * 
  * Dependencies:
  * - Platform: https://github.com/doates625/Platform.git
@@ -27,7 +30,7 @@
  * 
  * References:
  * - Multiplexing: https://en.wikipedia.org/wiki/Multiplexing
- * - Sparkfun mux: https://www.sparkfun.com/products/9056
+ * - Example Mux: https://www.sparkfun.com/products/9056
  */
 #pragma once
 #include <DigitalOut.h>
@@ -39,11 +42,16 @@ template<class IOClass>
 class Mux : public IOClass
 {
 public:
-	Mux(PLATFORM_PIN_TYPE pin, uint8_t num_sel_pins, DigitalOut* sel_pins);
+	Mux(
+		PLATFORM_PIN_TYPE pin,
+		uint8_t num_sel_pins,
+		DigitalOut* sel_pins,
+		uint32_t del_us = 0);
 	IOClass& operator[](uint8_t channel);
 protected:
 	uint8_t num_sel_pins;
 	DigitalOut* sel_pins;
+	uint32_t del_us;
 };
 
 /**
@@ -51,17 +59,20 @@ protected:
  * @param pin Platform-specific pin ID
  * @param num_sel_pins Number of select pins
  * @param sel_pins Array of select pins
+ * @param del_us Post-select delay [us]
  */
 template<class IOClass>
 Mux<IOClass>::Mux(
 	PLATFORM_PIN_TYPE pin,
 	uint8_t num_sel_pins,
-	DigitalOut* sel_pins
+	DigitalOut* sel_pins,
+	uint32_t del_us
 ) :
 	IOClass(pin)
 {
 	this->num_sel_pins = num_sel_pins;
 	this->sel_pins = sel_pins;
+	this->del_us = del_us;
 }
 
 /**
@@ -76,5 +87,10 @@ IOClass& Mux<IOClass>::operator[](uint8_t channel)
 	{
 		sel_pins[s].write((channel >> s) & 1u);
 	}
+#if defined(PLATFORM_ARDUINO)
+	delayMicroseconds(del_us);
+#elif defined(PLATFORM_MBED)
+	wait_us(del_us);
+#endif
 	return *this;
 }

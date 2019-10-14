@@ -43,7 +43,7 @@ class Mux : public IOClass
 {
 public:
 	Mux(
-		PLATFORM_PIN_TYPE pin,
+		Platform::pintype_t pin,
 		uint8_t num_sel_pins,
 		DigitalOut* sel_pins,
 		uint32_t del_us = 0);
@@ -63,7 +63,7 @@ protected:
  */
 template<class IOClass>
 Mux<IOClass>::Mux(
-	PLATFORM_PIN_TYPE pin,
+	Platform::pintype_t pin,
 	uint8_t num_sel_pins,
 	DigitalOut* sel_pins,
 	uint32_t del_us
@@ -87,10 +87,6 @@ IOClass& Mux<IOClass>::operator[](uint8_t channel)
 	{
 		sel_pins[s].write((channel >> s) & 1u);
 	}
-#if defined(PLATFORM_ARDUINO)
-	delayMicroseconds(del_us);
-#elif defined(PLATFORM_MBED)
-	wait_us(del_us);
-#endif
+	Platform::wait_us(del_us);
 	return *this;
 }

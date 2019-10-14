@@ -43,7 +43,7 @@ class Mux : public IOClass
 {
 public:
 	Mux(
-		Platform::pintype_t pin,
+		Platform::pin_t pin,
 		uint8_t num_sel_pins,
 		DigitalOut* sel_pins,
 		uint32_t del_us = 0);
@@ -63,7 +63,7 @@ protected:
  */
 template<class IOClass>
 Mux<IOClass>::Mux(
-	Platform::pintype_t pin,
+	Platform::pin_t pin,
 	uint8_t num_sel_pins,
 	DigitalOut* sel_pins,
 	uint32_t del_us

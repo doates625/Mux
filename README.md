@@ -9,6 +9,7 @@ This class is designed to interface with multiplexers that map 2^N channels to o
 - [DigitalIn](https://github.com/doates625/DigitalIn.git)
 - [PwmOut](https://github.com/doates625/PwmOut.git)
 - [AnalogIn](https://github.com/doates625/AnalogIn.git)
+- [PulseIn](https://github.com/doates625/PulseIn.git)
 
 The operator[] allows for natural indexing as if the object were truly an
 array of IO pins. For example:
